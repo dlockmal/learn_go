@@ -71,6 +71,11 @@ func exercise6() {
 		d = c + iota
 		e = c + iota
 		f = c + iota
+
+		g = 2017 + iota
+		h = 2017 + iota
+		i = 2017 + iota
+		j = 2017 + iota
 	)
 	fmt.Println(c)
 	fmt.Println(d)
