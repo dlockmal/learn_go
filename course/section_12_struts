@@ -1,0 +1,69 @@
+# Section 12: Structs
+
+## Struct
+- data structure
+- aggregate VALUES of different TYPE
+- creating a value of type
+- composite data structure
+- complex data structure
+```
+type person struct{
+	first string
+	last string
+}
+
+func main() {
+	p1 := person{
+		first:"James",
+		last:"Bond",
+	}
+	p2 := person{
+		first: "Miss",
+		last: "Moneypenny",
+	}
+	fmt.Println(p1)
+	fmt.Println(p2.first, p2.last)
+}
+```
+
+## Embedded structs
+- one type embedded in another type
+- you could have a collision in which case you can use
+	- sa1.person.first
+	- sa1.first
+```
+package main
+
+import (
+	"fmt"
+)
+
+type person struct {
+	first string
+	last string
+	age int
+}
+
+type secretAgent struct {
+	person
+	ltk bool
+}
+
+func main() {
+	sa1 := secretAgent{
+		person: person{
+			first: "James",
+			last: "Bond",
+			age: 32,
+		}, 
+		lkt: true,
+	}
+	fmt.Println(sa1.first, sa1.last, sa1.age, sa1.ltk)
+}
+```
+
+## Reading Documentation
+
+## Anonymous Structs
+
+## Housekeeping
