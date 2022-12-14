@@ -35,6 +35,8 @@ func main() {
 	exercise_5()
 	exercise_6()
 	exercise_7()
+	fx := exercise_8()
+	fmt.Println(fx)
 	fmt.Println(exercise_8()())
 	exercise_9()
 	exercise_10()
@@ -188,5 +190,26 @@ func exercise_10() {
 	{
 		y := 42
 		fmt.Println("This is exercise_10:", y)
+	}
+	f := enclosure()
+	fmt.Println(f())
+	fmt.Println(f())
+	fmt.Println(f())
+	fmt.Println(f())
+	fmt.Println(f())
+	fmt.Println(f())
+	g := enclosure()
+	fmt.Println(g())
+	fmt.Println(g())
+	fmt.Println(g())
+	fmt.Println(g())
+
+}
+
+func enclosure() func() int {
+	x := 0
+	return func() int {
+		x++
+		return x
 	}
 }
