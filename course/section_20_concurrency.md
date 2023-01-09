@@ -72,7 +72,15 @@ We are able to use sync.Waitgroup instead of *sync.Waitgroup like the documentat
 - Method set determines the interfaces that the type implements
 
 ## Documentation
-
+- golang.org -> effective go
+- Concurrent programming in many environments is made difficult by the sublteties required to implement correct access to shared variables
+- more arden labs diagrams
+- synchronization primitives
+- mutex and atomic
+- go routines are multiplexed onto multiople OS threads so if one should block, such as while waiting for I/O, others can run. Their design hides many of the complexities of thread creation and management.
+- Prefix a function or method with the go keyword to run the call in a new goroutine. When the call completes, the goroutine exits, silently.
+- a function literal can be handy in a goroutine invocation
+- https://play.golang.org/p/lBKFKCwrue
 
 ## Race condition
 
