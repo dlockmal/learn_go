@@ -46,6 +46,28 @@ func main() {
 
 
 ## Directional channels
+- You can mark channels as receive only
+	- so your only pulling values off and not putting data on the channel
+```
+func main() {
+	// this is a channel that can only send
+	c := make(chan<- int, 2)
+
+	// this is a channel that can only receive
+	c := make(<-chan int, 2)
+	
+	// this will fail and succeed depending on your channel type
+	c <- 42
+	c <- 43
+	
+	fmt.Println(<-chan)
+	fmt.Printf("%T\n", c)
+	 
+}
+```
+- channel type is read from left to right
+- you can take a bidirectional channel and make it more specific (send / receive) but you can't take a specific channel and make it more generic
+
 
 ## Using channels
 
