@@ -70,8 +70,54 @@ func main() {
 
 
 ## Using channels
+```
+func main() {
+
+c := make(chan int)
+
+	//send
+	go foo(c)
+	
+	//receive
+	bar(c)
+	
+	fmt.Println("about to exit")
+}
+
+	//send only channel
+	func foo(c chan<- int){
+		c <- 42
+	}
+	
+	//receive
+	func bar(c <-chan int){
+		fmt.Println(<-c)
+	}
+```
 
 ## Range
+- A nice design pattern
+```
+func main() {
+
+	c := make(chan int)
+
+	//send
+	gofunc(){
+	for i := 0; i < 100; i++{
+			c <- i
+		}
+		close(c)
+	}()
+	
+	//receive
+	for v := range c {
+		fmt.Println(v)
+	}
+	
+	fmt.Println("about to exit")
+}
+```
 
 ## Select
 
