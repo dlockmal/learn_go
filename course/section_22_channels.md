@@ -120,8 +120,67 @@ func main() {
 ```
 
 ## Select
+- channels block
+- Can use range or separate go routines to prevent
+```
+func main() {
+	eve := make(chan int)
+	odd := make(chan int)
+	quit := make(chan int)
+	
+	// send
+	go send(eve, odd, quit)
+	
+	// receive
+	receive(eve, odd, quit)
+	
+	fmt.Println("about to exit")
+}
 
-## Comma ok idiom
+func receive (e, o, q <- chan int) {
+	// infinite loop until we get out of it
+	for {
+		select {
+		case v := <- e:
+			fmt.Println("from the eve channel:", v)
+		case v := <- o:
+			fmt.Println("from the odd channel:", v)
+		case v := <- q:
+			fmt.Println("from the quit channel:", v)
+			return
+		}
+	}
+}
+
+func send(e, o, q chan<- int){
+	for i := 0; i < 100, i++{
+		if i % 2 == 0 {
+			e <- i
+		} else {
+			o <- i
+		}
+	}
+	q <- 0
+}
+```
+
+## Comma ok idiom with select statements
+- comma ok idiom with channels
+- there are other examples in the documentation
+```
+func main() {
+	c := make(chan int)
+	go func() {
+		c <- 42
+		close(c)
+	}()
+	
+	v, ok := <-c
+	
+	fmt.Println(v, ok)
+	fmt.Println(<-c)
+}
+```
 
 ## Fan in
 
