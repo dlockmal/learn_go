@@ -183,7 +183,237 @@ func main() {
 ```
 
 ## Fan in
+- fanned from multiple channels onto a single channel
+- nice design pattern, but a little complex
+```
+func main() {
+	even := make(chan int)
+	odd := make(chan int)
+	fanin := make(chan int)
+	
+	go send(even, odd)
+	
+	go receive(even, odd, fanin)
+	
+	for v := range fanin {
+		fmt.Println(v)
+	}
+	fmt.Println("About to exit")
+}
+
+// send channel
+func send(even, odd chan<- int) {
+	for i := 0; i < 100; i++ {
+		if i%2 == 0 {
+			even <- i
+		} else {
+			odd <- i
+		}
+	}
+	close(even)
+	close(odd)
+}
+
+// receive channel
+func receive(even, odd <-chan int, fanin chan<- int) {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	
+	go func() {
+		for v := range even {
+			fanin <- v
+		}
+		wg.Done()
+	}()
+	
+	go func() {
+		for v := range odd {
+			fanin <- v
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+	close(fanin)
+}
+```
 
 ## Fan out
+- taking a piece of work, and instead of doing the work sequential(serial), do it parallel
+- You can also throttle this work
+```
+func main() {
+	c1 := make(chan int)
+	c2 := make(chan int)
+	
+	go populate(c1)
+	
+	go fanOutIn(c1, c2)
+	
+	for v := range c2 {
+		fmt.Println(v)
+	}
+	
+	fmt.Println("about to exit")
+}
+
+func populate(c chan int) {
+	for i := 0; i < 100; i++ {
+		c <- i>
+	}
+	close(c)
+}
+
+func canOutIn(c1, c2 chan int) {
+	var wg sync.WaitGroup
+	for v := range c1 {
+		wg.Add(1)
+		go func(v2 int) {
+			c2 <- timeConsumingWork(v2)
+			wg.Done()
+		}(v)
+	}
+	wg.Wait()
+	close(c2)
+}
+
+func timeConsumingWork(n int) int {
+	time.Sleep(time.Microsecond * time.Duration(rand.Intn(500)))
+	return n + rand.Intn(1000)
+}
+```
+
+for throttling the code would look like this
+
+```
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"sync"
+	"time"
+)
+
+func main() {
+	c1 := make(chan int)
+	c2 := make(chan int)
+
+	go populate(c1)
+
+	go fanOutIn(c1, c2)
+
+	for v := range c2 {
+		fmt.Println(v)
+	}
+
+	fmt.Println("about to exit")
+}
+
+func populate(c chan int) {
+	for i := 0; i < 100; i++ {
+		c <- i
+	}
+	close(c)
+}
+
+func fanOutIn(c1, c2 chan int) {
+	var wg sync.WaitGroup
+	const goroutines = 10
+	wg.Add(goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		go func() {
+			for v := range c1 {
+				func(v2 int) {
+					c2 <- timeConsumingWork(v2)
+				}(v)
+			}
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+	close(c2)
+}
+
+func timeConsumingWork(n int) int {
+	time.Sleep(time.Microsecond * time.Duration(rand.Intn(500)))
+	return n + rand.Intn(1000)
+}
+
+```
 
 ## Context
+- a tool we can use for our concurrent design process launches other go routines, that when we cancel the top process all the goroutines cancel
+- We don't want to leak goroutines
+- passing around variables related to request
+- we need to know about as we get deeper into go but it's more of an advanced topic
+- the go blog by sameer 'Go Concurrency Patterns: Context'
+- good examples of request scoped data include user IDs, extracted headers, authentication tokens, or session ids
+- How did he know the type Context was a struct by looking at the docs? It's got to be in there somewhere
+- takaway general idea of contexts
+```
+func main() {
+	ctx := context.Background()
+	
+	fmt.Println("context:\t", ctx)
+	fmt.Println("context err:\t", ctx.Err())
+	fmt.Println("context type:\t%T"\n, ctx)
+	fmt.Println("-----------")
+	
+	// pass in a parent context
+	ctx, _ = context.WithCancel(ctx)
+	fmt.Println("context:\t", ctx)
+	fmt.Println("context err:\t", ctx.Err())
+	fmt.Println("cancel:\t\t", cancel)
+	fmt.Println("context type:\t%T"\n, ctx)
+	fmt.Println("cancel type:\t%T\n", cancel)
+	fmt.Println("-----------")
+	
+	cancel()
+	fmt.Println("context:\t", ctx)
+	fmt.Println("context err:\t", ctx.Err())
+	fmt.Println("cancel:\t\t", cancel)
+	fmt.Println("context type:\t%T"\n, ctx)
+	fmt.Println("cancel type:\t%T\n", cancel
+	fmt.Println("-----------")
+}
+
+```
+
+and here's a legit example
+```
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	
+	fmt.Println("error check 1:", ctx.Err())
+	fmt.Println("num gortins 1:", runtime.NumBoroutine())
+	
+	go func() {
+		n := 0
+		for {
+			select {
+				case <-ctx.Done():
+					return
+				default:
+					n++
+					time.Sleep(time.Millisecond * 200)
+					fmt.Println("working", n)
+			}
+		}
+	}()
+	
+	time.Sleep(time.Second * 2)
+	fmt.Println("error check 2:", ctx.Err())
+	fmt.Println("num gortins 2:", runtime.NumGoroutine())
+	
+	fmt.Println("about to cancel context")
+	cancel()
+	fmt.Println("cancelled context")
+	
+	time.Sleep(time.Second * 2)
+	fmt.Println("error check 3:", ctx.Err())
+	fmt.Println("num gortins 3:", runtime.NumGoroutine())
+}
+```
+
+- when you create a service, you want to be very careful with goroutines and not leak any of them
