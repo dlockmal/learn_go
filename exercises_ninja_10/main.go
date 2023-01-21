@@ -8,6 +8,9 @@ func main() {
 	exercise_2_2()
 	exercise_3()
 	exercise_4()
+	exercise_5()
+	exercise_6()
+	exercise_7()
 }
 
 func exercise_1() {
@@ -113,4 +116,58 @@ func receive4(c, q <-chan int) {
 			return
 		}
 	}
+}
+
+func exercise_5() {
+	// show the comma ok idiom starting with the code
+	c := make(chan int)
+
+	go func() {
+		c <- 42
+	}()
+
+	v, ok := <-c
+	fmt.Println(v, ok)
+
+	close(c)
+
+	v, ok = <-c
+	fmt.Println(v, ok)
+}
+
+func exercise_6() {
+	// write a program that puts 100 numbers to a channel
+	// pull the numbers off the channel and print them
+	c := make(chan int)
+	go func() {
+		for i := 0; i < 100; i++ {
+			c <- i
+		}
+		close(c)
+	}()
+
+	for v := range c {
+		fmt.Println(v)
+	}
+	fmt.Println("Exercise 6: About to exit")
+}
+
+func exercise_7() {
+	// write a program that launches 10 goroutines
+	// each goroutine adds 10 numbers to a channel
+	// pull the numbers off the channel and print them
+	c := make(chan int)
+
+	for i := 0; i < 10; i++ {
+		go func() {
+			for x := 0; x < 10; x++ {
+				c <- x
+			}
+		}()
+	}
+
+	for v := 0; v < 100; v++ {
+		fmt.Println(v, <-c)
+	}
+	fmt.Println("Exercise 7 about to close")
 }
