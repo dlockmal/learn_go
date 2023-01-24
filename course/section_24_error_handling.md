@@ -103,5 +103,111 @@ func main() {
 - probably try to stick to the log package
 
 ## Recover
+- The Go Blog: Defer, Panic, and Recover
+### Defer
+- List itemDefer can be used to do things like ensure the file is close right after opening in
+- a deferred function's arguments are evaluated when the defer statement is evaluated
+- Deferred function calls are executed in last in first out order after the surrounding function
+- Deffered functions may read and assign to the returning function's named return value (name return value: gross)
+	
+### Panic / Recover
+- Recover is only useful inside deferred functions
+- a call to recover will only return a value during a panic
+- the json package has a real-world example of panic / recover
+
+Example of Panic / Recover (intermediate to advanced)
+```
+func main() {
+	f()
+	fmt.Println("Returned normally from f.")
+}
+
+func f() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+		}
+	}()
+	fmt.Println("Calling g.")
+	g(0)
+	fmt.Println("Returned normally from g.")
+}
+
+func g(i int) {
+	if i > 3 {
+		fmt.Println("Panicking!")
+		panic(fmt.Sprintf("%v", i))
+	}
+	defer fmt.Println("Defer in g", i)
+}
+```
 
 ## Errors with info
+```
+func main() {
+	_, err := sqrt(-10)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func sqrt(f float64) (float64, err) {
+	if f < 0 {
+		return 0, errors.New("norgate math: square root of negative number")
+	}
+	return 42, nil
+}
+```
+
+There is also this format
+```
+var ErrNorgateMath = errors.New("norgate math: square root of a negative number")
+
+func sqrt(f float64) (float64, error) {
+	if f < 0 {
+		return 0, ErrNorgateMath
+	}
+	return 42, nil
+}
+```
+
+Another Format (error f format printing)
+```
+func sqrt(f float64) (float64, error) {
+	if f < 0 {
+		return 0, fmt.Errorf("norgate math again: %v", f)
+	}
+	return 42, nil
+}
+```
+
+- if we have a type, like a struct, and has a method with Error() string then any value of this type will implicitly implement the error interface (Builtin)
+
+```
+type norgateMathError struct {
+	lat string
+	long string
+	err error
+}
+
+func (n norgateMathError) Error() string {
+	return fmt.Sprintf("a norgate math error occured: %v %v %v", n.lat, n.long, n.err)
+}
+
+func main() {
+	_, err := sqrt(-10.23)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func sqrt(f float64) (float64, error) {
+	if f < 0 {
+		nme := return 0, norgateMathError{"50.2289 N", "99.4656 W", nme}
+	}
+	return 42, nil
+}
+
+```
+
+- errors are just another type, you can create values of that type
