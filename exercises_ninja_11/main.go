@@ -73,15 +73,15 @@ func exercise_2() {
 
 // toJSON needs to return an error also
 func toJSON(a interface{}) ([]byte, error) {
-	e := errors.New("This is an error")
+	e := errors.New("this is an error")
 	fmt.Println(e)
 	fmt.Printf("%T\n", e)
 
 	bs, err := json.Marshal(a)
 	if err != nil {
 		// this works
-		// return []byte{}, fmt.Errorf("There was an error in toJSON: %v", err)
-		return []byte{}, errors.New(fmt.Sprintf("There was an error in toJSON: %v", err))
+		return []byte{}, fmt.Errorf("there was an error in toJSON: %v", err)
+		// return []byte{}, errors.New(fmt.Sprintf("There was an error in toJSON: %v", err))
 
 	}
 	return bs, nil
@@ -92,6 +92,7 @@ func (ce customErr) Error() string {
 }
 
 func foo(f error) {
+	// redundant new line
 	fmt.Println("foo ran -", f, "\n")
 	// assertion is different than conversion
 	// fmt.Println("foo ran -", e, "\n", e.(customErr).info)
@@ -116,6 +117,8 @@ func exercise_4() {
 		log.Println(err)
 	}
 }
+
+// spend more time on composite literal
 
 func sqrt(f float64) (float64, error) {
 	if f < 0 {
