@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 )
@@ -45,6 +46,7 @@ func exercise_1() {
 	bs, err := json.Marshal(p1)
 	if err != nil {
 		fmt.Println(err)
+		log.Fatal("JSON did not marshal - here's the error:", err)
 		return
 	}
 	fmt.Println(string(bs))
@@ -59,11 +61,30 @@ func exercise_2() {
 		Sayings: []string{"Shaken, not stirred", "Any last wishes?", "Never say never"},
 	}
 
-	bs, err := json.Marshal(p1)
+	bs, err := toJSON(p1)
 	if err != nil {
-		fmt.Errorf("There has been an error marshaling: %v", err)
+		// log.Println(err)
+		log.Fatal(err)
+		// return
 	}
+
 	fmt.Println(string(bs))
+}
+
+// toJSON needs to return an error also
+func toJSON(a interface{}) ([]byte, error) {
+	e := errors.New("This is an error")
+	fmt.Println(e)
+	fmt.Printf("%T\n", e)
+
+	bs, err := json.Marshal(a)
+	if err != nil {
+		// this works
+		// return []byte{}, fmt.Errorf("There was an error in toJSON: %v", err)
+		return []byte{}, errors.New(fmt.Sprintf("There was an error in toJSON: %v", err))
+
+	}
+	return bs, nil
 }
 
 func (ce customErr) Error() string {
@@ -72,6 +93,8 @@ func (ce customErr) Error() string {
 
 func foo(f error) {
 	fmt.Println("foo ran -", f, "\n")
+	// assertion is different than conversion
+	// fmt.Println("foo ran -", e, "\n", e.(customErr).info)
 }
 
 func exercise_3() {
