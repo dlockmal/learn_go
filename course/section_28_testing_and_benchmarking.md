@@ -110,13 +110,76 @@ func ExampleSum() {
 }
 ```
 
-
 ## Golint
+- govet reports suspicious constructs
+- golint is a linter for source code
+- gofmt reformats go source where where golint prints out style mistakes
+```
+// reports poor formatting style
+golint 
+
+// recursively scan
+golint ./...
+
+// how to install
+go get -u github.com/golang/lint/golint
+```
 
 ## Benchmark
+- Measure the performance of your code
+- There are examples in the course content
+```
+func main() {
+	fmt.Println(saying.Greet("James"))
+}
+```
+- need to add benchmark to the testing file
+
+main_test.go
+```
+package saying
+
+func TestGreet(t *testing.T) {
+	s := Greet("James")
+	if s != "Welcome my dear James" {
+		t.Error("got", s, "expected", "Welcome my dear James")
+	}
+}
+
+func ExampleGreet() {
+	fmt.Println(Greet("James"))
+	// Output:
+	// Welcome my dear James
+}
+
+func BenchmarkGreet(b *testing.B) {
+	for i := 0; t < b.N; i++ {
+		Greet("James")
+	}
+}
+```
+- This will run all benchmarks in the folder
+```
+go test -bench .
+
+// this is popular to see
+-bench=.
+```
 
 ## Coverage
+- Always cover as much as possible
+- 100% is near unachievable 
+- You can run coverage analysis using go
+```
+// check how much coverage your tests have
+go test -cover
 
-## Benchmark examples
+// output file shows the same 
+go test -coverprofile c.out 
 
-## Review
+// show in browser
+go tool cover -html=c.out
+
+// learn more
+go tool cover -h
+```
